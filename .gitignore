@@ -1,0 +1,4 @@
+# Exclude stuff
+/x64/
+/Debug/
+/.vs/
