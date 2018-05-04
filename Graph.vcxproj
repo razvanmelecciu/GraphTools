@@ -82,14 +82,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="GraphCommon.hpp" />
-    <ClInclude Include="GraphBase.hpp" />
+    <ClInclude Include="src\GraphAlgorithms.hpp" />
+    <ClInclude Include="src\GraphBase.hpp" />
+    <ClInclude Include="src\GraphCommon.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Graph.cpp" />
-    <ClInclude Include="GraphAlgorithms.hpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

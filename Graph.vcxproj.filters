@@ -21,13 +21,13 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphBase.hpp">
+    <ClInclude Include="src\GraphAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphCommon.hpp">
+    <ClInclude Include="src\GraphBase.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphAlgorithms.hpp">
+    <ClInclude Include="src\GraphCommon.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
