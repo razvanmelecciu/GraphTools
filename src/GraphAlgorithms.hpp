@@ -17,15 +17,11 @@ struct Traits
   typedef search_structure_ search_structure_trait;
 };
 
-template <StorageMethod storage_method = ADJACENCY_MATRIX,
-          class distance_type = int,
-          class eq_elems = graph::equivalent_elements<distance_type>,
-          class traits = Traits<>,
-          class graph_type = GraphContainer<storage_method, distance_type, eq_elems> >
+template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
+          class traits = Traits<>>
 struct Traversal
 {
-  typedef eq_elems equivalent_elements;
-  
+  typedef typename graph_type::equivalence_cmp equivalent_elements;
   typedef typename traits::vertices_list_trait vertices_list;
   typedef typename traits::search_structure_trait search_structure;
 
@@ -61,9 +57,6 @@ struct Traversal
     DFRecursive(my_graph, crt_vertex, node_labels, visited_nodes);
   }
 
-  /// Topological traversal
-  //TODO
-
 private :
 
   static void DFRecursive(const graph_type& my_graph, std::size_t crt_vertex, vertices_list& node_labels, search_structure& visited_nodes)
@@ -88,10 +81,8 @@ private :
   }
 };
 
-template <StorageMethod storage_method = ADJACENCY_MATRIX,
-          class distance_type = int,
-          class eq_elems = graph::equivalent_elements<distance_type>,
-          class graph_type = GraphContainer<storage_method, distance_type, eq_elems> >
+template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
+          class traits = Traits<>>
 struct Features
 {
   /// Extract Connected components
@@ -117,12 +108,11 @@ struct Features
 };
 
 
-template <StorageMethod storage_method = ADJACENCY_MATRIX,
-          class distance_type = int,
-          class eq_elems = graph::equivalent_elements<distance_type>,
-          class graph_type = GraphContainer<storage_method, distance_type, eq_elems> >
+template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
+          class traits = Traits<>>
 struct MSP
 {
+  static_assert(graph_type::directed_graph == 0, "Invalid graph type");
   /// Kruskal
   //TODO
 
@@ -130,10 +120,8 @@ struct MSP
   //TODO
 };
 
-template <StorageMethod storage_method = ADJACENCY_MATRIX,
-          class distance_type = int,
-          class eq_elems = graph::equivalent_elements<distance_type>,
-          class graph_type = GraphContainer<storage_method, distance_type, eq_elems> >
+template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
+          class traits = Traits<>>
 struct Paths
 {
   /// Djikstra

@@ -8,7 +8,8 @@
 
 GRAPH_START
 
-enum StorageMethod : unsigned short { ADJACENCY_MATRIX = 0x00, ADJACENCY_LIST };
+enum StoragePolicy : unsigned short { ADJACENCY_MATRIX = 0x00, ADJACENCY_LIST };
+enum LinkType : unsigned short { DIRECTED, UNDIRECTED };
 
 template
 <class elem_type>
@@ -20,8 +21,23 @@ struct equivalent_elements
   }
 };
 
+template
+<LinkType link_type>
+struct IsDirectedGraph
+{
+  enum { value = 0 };
+};
+
+template
+<>
+struct IsDirectedGraph<DIRECTED>
+{
+  enum { value = 1 };
+};
+
 /// A graph container class meant for keeping the nodes of a graph, no algorithms provided here
-template <StorageMethod storage_method,
+template <StoragePolicy storage_method,
+          LinkType link_type = UNDIRECTED,
           class distance_type = int,
           class eq_elems = equivalent_elements<distance_type> >
 class GraphContainer
@@ -30,8 +46,9 @@ class GraphContainer
 
 /// A partial specialization meant to deal with dense graphs
 template <class distance_type,
+          LinkType link_type,
           class eq_elems>
-class GraphContainer<ADJACENCY_MATRIX, distance_type, eq_elems>
+class GraphContainer<ADJACENCY_MATRIX, link_type, distance_type, eq_elems>
 {
 public :
 
@@ -41,6 +58,7 @@ public :
   typedef eq_elems equivalence_cmp;
 
   enum { crt_storage_type = ADJACENCY_MATRIX };
+  enum { directed_graph = IsDirectedGraph<link_type>::value };
   enum { undefined_weight = 0 };
 
   /// Ctor
@@ -145,7 +163,7 @@ public :
     return static_cast<distance_type>(MatrixElem(i, j));
   }
 
-  /// Check if the relation is symmetric relation iRj and jRi
+  /// Check if the relation is symmetric relation iRj and jRi (not that the cost is the same)
   bool SymmetricRelation(std::size_t i, std::size_t j) const
   {
     if (i >= no_vertices_ || j >= no_vertices_)
@@ -154,10 +172,13 @@ public :
       return false;
     }
 
-    equivalence_cmp equiv;
+    if (directed_graph)
+    {
+      equivalence_cmp equiv;
 
-    if (equiv(MatrixElemCst(i, j), undefined_weight) || equiv(MatrixElemCst(i, j), undefined_weight))
-      return false;
+      if (equiv(MatrixElemCst(i, j), undefined_weight) || equiv(MatrixElemCst(j, i), undefined_weight))
+        return false;
+    }
 
     return true;
   }
@@ -171,15 +192,28 @@ public :
       return;
     }
 
-    std::size_t st_offset  = vertex * no_vertices_;
-    std::size_t end_offset = st_offset + no_vertices_;
-    equivalence_cmp equiv;
 
-    for (std::size_t i = st_offset; i < end_offset; ++i)
+    equivalence_cmp equiv;
+    if (directed_graph)
     {
-      if (!equiv(adjacency_matrix_[i], undefined_weight))
-        vertex_list.push_back(i % no_vertices_);
+      std::size_t st_offset = vertex * no_vertices_;
+      std::size_t end_offset = st_offset + no_vertices_;
+
+      for (std::size_t i = st_offset; i < end_offset; ++i)
+      {
+        if (!equiv(adjacency_matrix_[i], undefined_weight))
+          vertex_list.push_back(i % no_vertices_);
+      }
     }
+    else
+    {
+      for (std::size_t i = 0; i < no_vertices_; ++i)
+      {
+        if (!equiv(MatrixElemCst(vertex, i), undefined_weight))
+          vertex_list.push_back(i);
+      }
+    }
+    
   }
 
   // - Mutators
@@ -194,7 +228,7 @@ public :
     }
 
     MatrixElem(i, j) = weight;
-    if (symmetric)
+    if (directed_graph && symmetric)
       MatrixElem(j, i) = weight;
   }
 
@@ -216,7 +250,8 @@ public :
   /// Clear all links
   void ClearAllLinks()
   {
-    for (std::size_t i = 0; i < no_vertices_; ++i)
+    std::size_t alloc_size = AllocSize();
+    for (std::size_t i = 0; i < alloc_size; ++i)
       *(adjacency_matrix_ + i) = undefined_weight;
   }
   
@@ -227,21 +262,57 @@ protected :
   /// Get the corresponding matrix element
   weight_element_type& MatrixElem(std::size_t i, std::size_t j)
   {
-    std::size_t offset = i * no_vertices_ + j;
+    std::size_t offset = 0;
+    if (!directed_graph)
+    {
+      if (i <= j)
+      {
+        if (i > 0)
+          offset = (i * no_vertices_ - (i * (i - 1) / 2));
+        offset += (j - i);
+      }
+      else
+      {
+        if (j > 0)
+          offset = (j * no_vertices_ - (j * (j - 1) / 2));
+        offset += (i - j);
+      }
+    }
+    else
+      offset = i * no_vertices_ + j;
+
     return *(adjacency_matrix_ + offset);
   }
 
   /// Get the corresponding matrix element
   const weight_element_type& MatrixElemCst(std::size_t i, std::size_t j) const
   {
-    std::size_t offset = i * no_vertices_ + j;
-    return *(adjacency_matrix_ + offset);
+    std::size_t offset = 0;
+    if (!directed_graph)
+    {
+      if (i <= j)
+      {
+        if (i > 0)
+          offset = (i * no_vertices_ - (i * (i - 1) / 2));
+        offset += (j - i);
+      }
+      else
+      {
+        if (j > 0)
+          offset = (j * no_vertices_ - (j * (j - 1) / 2));
+        offset += (i - j);
+      }
+    }
+    else
+      offset = i * no_vertices_ + j;
+
+      return *(adjacency_matrix_ + offset);
   }
 
   /// Linear array size
   std::size_t AllocSize() const
   {
-    return no_vertices_ * no_vertices_;
+    return directed_graph ? (no_vertices_ * no_vertices_) : (no_vertices_ * (no_vertices_ + 1) / 2);
   }
 
   // - Members
