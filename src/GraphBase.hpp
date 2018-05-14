@@ -62,18 +62,19 @@ public :
   enum { undefined_weight = 0 };
 
   /// Ctor
-  GraphContainer(std::size_t no_vertices) : no_vertices_(no_vertices), adjacency_matrix_(new weight_element_type[no_vertices * no_vertices])
+  GraphContainer(std::size_t no_vertices) : no_vertices_(no_vertices)
   {
     std::size_t alloc_size = AllocSize();
+    adjacency_matrix_ = new weight_element_type[alloc_size];
     for (std::size_t i = 0; i < alloc_size; ++i)
       *(adjacency_matrix_ + i) = undefined_weight;
   }
 
   /// Copy ctor
-  GraphContainer(const GraphContainer& rhs_elem) : no_vertices_(rhs_elem.no_vertices_), 
-                                                   adjacency_matrix_(new weight_element_type[rhs_elem.no_vertices_ * rhs_elem.no_vertices_])
+  GraphContainer(const GraphContainer& rhs_elem) : no_vertices_(rhs_elem.no_vertices_)
   {
     std::size_t alloc_size = AllocSize();
+    adjacency_matrix_ = new weight_element_type[alloc_size];
     for (std::size_t i = 0; i < alloc_size; ++i)
       *(adjacency_matrix_ + i) = *(rhs_elem.adjacency_matrix_ + i);
   }
