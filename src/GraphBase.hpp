@@ -9,11 +9,12 @@
 GRAPH_START
 
 enum StoragePolicy : unsigned short { ADJACENCY_MATRIX = 0x00, ADJACENCY_LIST };
+enum DegreeType : unsigned char { EXTERNAL = 0x00, INTERNAL };
 enum LinkType : unsigned short { DIRECTED, UNDIRECTED };
 
 template
 <class elem_type>
-struct equivalent_elements
+struct EquivalentElements
 {
   bool operator () (elem_type a, elem_type b)
   {
@@ -39,7 +40,7 @@ struct IsDirectedGraph<DIRECTED>
 template <StoragePolicy storage_method,
           LinkType link_type = UNDIRECTED,
           class distance_type = int,
-          class eq_elems = equivalent_elements<distance_type> >
+          class eq_elems = EquivalentElements<distance_type> >
 class GraphContainer
 {
 };
@@ -175,6 +176,48 @@ public :
     }
 
     return no_edges;
+  }
+
+  /// Compute the internal/external degree of a node (for undirected graphs the internal and external degree are the same)
+  unsigned int ComputeDegree(int input_vertex, DegreeType degr_option = EXTERNAL) const
+  {
+    if (input_vertex >= static_cast<int>(no_vertices_) || input_vertex < 0)
+    {
+      assert(false && "Invalid vertex specified");
+      return false;
+    }
+
+    unsigned int comp_degree = 0;
+
+    if (directed_graph)
+    {
+      switch (degr_option)
+      {
+      case graph::EXTERNAL :
+      default :
+        {
+          for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
+            if (HasLink(input_vertex, i))
+              ++comp_degree;
+        }
+        break;
+      case graph::INTERNAL :
+        {
+          for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
+            if (HasLink(i, input_vertex))
+              ++comp_degree;
+        }
+        break;
+      }
+    }
+    else
+    {
+      for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
+        if (HasLink(input_vertex, i))
+          ++comp_degree;
+    }
+
+    return comp_degree;
   }
 
   /// Get the maximum number of edges (refflexivity not included e.g. xRx)
