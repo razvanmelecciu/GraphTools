@@ -175,7 +175,6 @@ struct Features
   }
 };
 
-
 template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
           class traits = Traits<>>
 struct MSP
@@ -203,7 +202,7 @@ struct Paths
   /// Djikstra
   //TODO
 
-  /// Compute all the minimum paths (Floyd-Warshall -> places the distance instead of the edge cost)
+  /// Compute all the minimum paths (Floyd-Warshall-returns a square matrix with the associated cost)
   static void ComputePaths(const graph_type& my_input_graph, graph::common::SquareMatrix<dist_type>& cost_output)
   {
     dist_type max_val = std::numeric_limits<dist_type>::max() / 1000;
@@ -241,7 +240,7 @@ struct Paths
     }
   }
 
-  /// Compute all the minimum paths (Floyd-Warshall -> places the distance instead of the edge cost)
+  /// Compute all the minimum paths (Floyd-Warshall-returns a square matrix with the associated cost and a matrix with the next vertex for reconstructing the minimum paths)
   static void ComputePathsTrails(const graph_type& my_input_graph, graph::common::SquareMatrix<dist_type>& cost_output,
                                  graph::common::SquareMatrix<int>& nxt_matrix)
   {
