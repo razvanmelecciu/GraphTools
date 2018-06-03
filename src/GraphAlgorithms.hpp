@@ -10,6 +10,8 @@
 GRAPH_START
 ALGO_START
 
+enum DegreeType : unsigned char { EXTERNAL = 0x00, INTERNAL };
+
 /// Default trait class that defines the vertex list (deque, vector, list) and the search structure used (set, unordered_set)
 template <class vertex_list_ = std::deque<int> ,
           class search_structure_ = std::unordered_set<int> >
@@ -87,6 +89,50 @@ template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
           class traits = Traits<> >
 struct Features
 {
+  /// Compute the internal/external degree of a node (for undirected graphs the internal and external degree are the same)
+  static unsigned int ComputeDegree(const graph_type& my_input_graph, int input_vertex, DegreeType degr_option = EXTERNAL)
+  {
+    unsigned int vertices_nb = my_input_graph.NoVertices();
+
+    if (input_vertex >= static_cast<int>(vertices_nb) || input_vertex < 0)
+    {
+      assert(false && "Invalid vertex specified");
+      return false;
+    }
+
+    unsigned int comp_degree = 0;
+
+    if (graph_type::directed_graph)
+    {
+      switch (degr_option)
+      {
+      case graph::EXTERNAL:
+      default:
+        {
+          for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
+            if (my_input_graph.HasLink(input_vertex, i))
+              ++comp_degree;
+        }
+        break;
+      case graph::INTERNAL:
+        {
+          for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
+            if (my_input_graph.HasLink(i, input_vertex))
+              ++comp_degree;
+        }
+        break;
+      }
+    }
+    else
+    {
+      for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
+        if (my_input_graph.HasLink(input_vertex, i))
+          ++comp_degree;
+    }
+
+    return comp_degree;
+  }
+
   /// Extract Connected components
   //TODO
 
@@ -108,14 +154,14 @@ struct Features
   /// Compute Transitive closure (Roy-Warshall -> places 1 as the cost for the vertex connections)
   static void TransitiveClosure(const graph_type& my_input_graph, graph::common::SquareMatrix<bool>& transitive_closure)
   {
-    unsigned int vertices_nb = my_graph.NoVertices();
+    unsigned int vertices_nb = my_input_graph.NoVertices();
     transitive_closure.SetSize(vertices_nb, false);
     int i = 0, j = 0, k = 0;
 
     for (i = 0; i < vertices_nb; ++i)
     {
       for (j = 0; j < vertices_nb; ++j)
-        transitive_closure(i, j) = output_graph.HasLink(i, j);
+        transitive_closure(i, j) = my_input_graph.HasLink(i, j);
     }
 
     for (k = 0; k < vertices_nb; ++k)

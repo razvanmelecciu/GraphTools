@@ -9,7 +9,6 @@
 GRAPH_START
 
 enum StoragePolicy : unsigned short { ADJACENCY_MATRIX = 0x00, ADJACENCY_LIST };
-enum DegreeType : unsigned char { EXTERNAL = 0x00, INTERNAL };
 enum LinkType : unsigned short { DIRECTED, UNDIRECTED };
 
 template
@@ -176,48 +175,6 @@ public :
     }
 
     return no_edges;
-  }
-
-  /// Compute the internal/external degree of a node (for undirected graphs the internal and external degree are the same)
-  unsigned int ComputeDegree(int input_vertex, DegreeType degr_option = EXTERNAL) const
-  {
-    if (input_vertex >= static_cast<int>(no_vertices_) || input_vertex < 0)
-    {
-      assert(false && "Invalid vertex specified");
-      return false;
-    }
-
-    unsigned int comp_degree = 0;
-
-    if (directed_graph)
-    {
-      switch (degr_option)
-      {
-      case graph::EXTERNAL :
-      default :
-        {
-          for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
-            if (HasLink(input_vertex, i))
-              ++comp_degree;
-        }
-        break;
-      case graph::INTERNAL :
-        {
-          for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
-            if (HasLink(i, input_vertex))
-              ++comp_degree;
-        }
-        break;
-      }
-    }
-    else
-    {
-      for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
-        if (HasLink(input_vertex, i))
-          ++comp_degree;
-    }
-
-    return comp_degree;
   }
 
   /// Get the maximum number of edges (refflexivity not included e.g. xRx)
