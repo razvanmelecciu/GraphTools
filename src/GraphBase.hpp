@@ -53,8 +53,8 @@ class GraphContainer<ADJACENCY_MATRIX, link_type, distance_type, eq_elems>
 public :
 
   typedef distance_type weight_element_type;
-  typedef std::pair<std::size_t, distance_type> vertex_cost;
-  typedef std::deque<std::size_t> neighbors_list;
+  typedef std::pair<int, distance_type> vertex_cost;
+  typedef std::deque<int> neighbors_list;
   typedef eq_elems equivalence_cmp;
 
   enum { crt_storage_type = ADJACENCY_MATRIX };
@@ -67,40 +67,40 @@ public :
     {
     }
 
-    Edge(std::size_t i, std::size_t j, distance_type cost) : start_(i), end_(j), edge_cost_(cost)
+    Edge(int i, int j, distance_type cost) : start_(i), end_(j), edge_cost_(cost)
     {
     }
 
-    std::size_t start_, end_;
+    int start_, end_;
     distance_type edge_cost_;
   };
 
   /// Ctor
-  GraphContainer(std::size_t no_vertices) : no_vertices_(no_vertices)
+  GraphContainer(unsigned int no_vertices) : no_vertices_(no_vertices)
   {
-    std::size_t alloc_size = AllocSize();
+    unsigned int alloc_size = AllocSize();
     adjacency_matrix_ = new weight_element_type[alloc_size];
-    for (std::size_t i = 0; i < alloc_size; ++i)
+    for (unsigned int i = 0; i < alloc_size; ++i)
       *(adjacency_matrix_ + i) = undefined_weight;
   }
 
   /// Ctor (practically creates a complete graph with n(n-1) edges for digraphs or n(n-1)/2 edges for undirected graphs with the specified weight)
-  GraphContainer(std::size_t no_vertices, const distance_type& initial_weight) : no_vertices_(no_vertices)
+  GraphContainer(unsigned int no_vertices, const distance_type& initial_weight) : no_vertices_(no_vertices)
   {
-    std::size_t alloc_size = AllocSize();
+    unsigned int alloc_size = AllocSize();
     adjacency_matrix_ = new weight_element_type[alloc_size];
-    for (std::size_t i = 0; i < alloc_size; ++i)                // safe to put since the vertices don't generally have links to themselves
+    for (unsigned int i = 0; i < alloc_size; ++i)                // safe to put since the vertices don't generally have links to themselves
       *(adjacency_matrix_ + i) = initial_weight;
-    for (std::size_t i = 0; i < no_vertices_; ++i)
+    for (unsigned int i = 0; i < no_vertices_; ++i)
       MatrixElem(i, i) = undefined_weight;
   }
 
   /// Copy ctor
   GraphContainer(const GraphContainer& rhs_elem) : no_vertices_(rhs_elem.no_vertices_)
   {
-    std::size_t alloc_size = AllocSize();
+    unsigned int alloc_size = AllocSize();
     adjacency_matrix_ = new weight_element_type[alloc_size];
-    for (std::size_t i = 0; i < alloc_size; ++i)
+    for (unsigned int i = 0; i < alloc_size; ++i)
       *(adjacency_matrix_ + i) = *(rhs_elem.adjacency_matrix_ + i);
   }
 
@@ -125,10 +125,10 @@ public :
         delete[] adjacency_matrix_; 
 
       no_vertices_ = rhs_elem.no_vertices;
-      std::size_t alloc_size = AllocSize();
+      unsigned int alloc_size = AllocSize();
 
       adjacency_matrix_ = new weight_element_type[alloc_size];
-      for (std::size_t i = 0; i < alloc_size; ++i)
+      for (unsigned int i = 0; i < alloc_size; ++i)
         *(adjacency_matrix_ + i) = *(rhs_elem.adjacency_matrix_ + i);
     }
 
@@ -156,16 +156,16 @@ public :
   // - Accessors
 
   /// Get the number of vertices
-  std::size_t NoVertices() const
+  unsigned int NoVertices() const
   {
     return no_vertices_;
   }
 
   /// Count the number of defined edges
-  std::size_t NoEdges() const
+  unsigned int NoEdges() const
   {
-    std::size_t alloc_size = AllocSize();
-    std::size_t no_edges = 0;
+    unsigned int alloc_size = AllocSize();
+    unsigned int no_edges = 0;
     equivalence_cmp equiv;
 
     for (auto i = 0; i < alloc_size; ++i)
@@ -178,9 +178,9 @@ public :
   }
 
   /// Get the maximum number of edges (refflexivity not included e.g. xRx)
-  std::size_t MaxNoEdges() const
+  unsigned int MaxNoEdges() const
   {
-    std::size_t max_nb_edge = no_vertices_ * (no_vertices_ - 1);  // digraph
+    unsigned int max_nb_edge = no_vertices_ * (no_vertices_ - 1);  // digraph
     if (!directed_graph)                                          // graphs (undirected graphs)
       max_nb_edge /= 2;
 
@@ -188,9 +188,9 @@ public :
   }
 
   /// Has link between i and j
-  bool HasLink(std::size_t i, std::size_t j) const
+  bool HasLink(int i, int j) const
   {
-    if (i >= no_vertices_ || j >= no_vertices_)
+    if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || i < 0 || j < 0)
     {
       assert(false && "Invalid vertices specified");
       return false;
@@ -204,9 +204,9 @@ public :
   }
 
   /// Get the weight from node i to node j
-  distance_type GetWeight(std::size_t i, std::size_t j) const
+  distance_type GetWeight(int i, int j) const
   {
-    if (i >= no_vertices_ || j >= no_vertices_ || i == j)
+    if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || i < 0 || j < 0 || i == j)
     {
       assert(false && "Invalid vertices specified");
       return undefined_weight;
@@ -216,9 +216,9 @@ public :
   }
 
   /// Check if the relation is symmetric relation iRj and jRi (not that the cost is the same)
-  bool SymmetricRelation(std::size_t i, std::size_t j) const
+  bool SymmetricRelation(int i, int j) const
   {
-    if (i >= no_vertices_ || j >= no_vertices_ || i == j)
+    if (i >= no_vertices_ || j >= no_vertices_ || i < 0 || j < 0 || i == j)
     {
       assert(false && "Invalid vertices specified");
       return false;
@@ -236,9 +236,9 @@ public :
   }
 
   /// Get the list of links for the current node
-  void GetLinks(std::size_t vertex, neighbors_list& vertex_list) const
+  void GetLinks(int vertex, neighbors_list& vertex_list) const
   {
-    if (vertex >= no_vertices_)
+    if (vertex >= static_cast<int>(no_vertices_) || vertex < 0)
     {
       assert(false && "Invalid vertex specified");
       return;
@@ -247,10 +247,10 @@ public :
     equivalence_cmp equiv;
     if (directed_graph)
     {
-      std::size_t st_offset = vertex * no_vertices_;
-      std::size_t end_offset = st_offset + no_vertices_;
+      unsigned int st_offset = vertex * no_vertices_;
+      unsigned int end_offset = st_offset + no_vertices_;
 
-      for (std::size_t i = st_offset; i < end_offset; ++i)
+      for (unsigned int i = st_offset; i < end_offset; ++i)
       {
         if (!equiv(adjacency_matrix_[i], undefined_weight))
           vertex_list.push_back(i % no_vertices_);
@@ -258,7 +258,7 @@ public :
     }
     else
     {
-      for (std::size_t i = 0; i < no_vertices_; ++i)
+      for (unsigned int i = 0; i < no_vertices_; ++i)
       {
         if (!equiv(MatrixElemCst(vertex, i), undefined_weight))
           vertex_list.push_back(i);
@@ -275,10 +275,10 @@ public :
 
     if (directed_graph)
     {
-      for (std::size_t i = 0; i < no_vertices_; ++i)
+      for (unsigned int i = 0; i < no_vertices_; ++i)
       {
         crtEdge.start_ = i;
-        for (std::size_t j = 0; j < no_vertices_; ++j)
+        for (unsigned int j = 0; j < no_vertices_; ++j)
         {
           crtEdge.end_ = j;
           crtEdge.edge_cost_ = MatrixElemCst(i, j);
@@ -288,10 +288,10 @@ public :
     }
     else
     {
-      for (std::size_t i = 0; i < no_vertices_; ++i)
+      for (unsigned int i = 0; i < no_vertices_; ++i)
       {
         crtEdge.start_ = i;
-        for (std::size_t j = i; j < no_vertices_; ++j)
+        for (unsigned int j = i; j < no_vertices_; ++j)
         {
           crtEdge.end_ = j;
           crtEdge.edge_cost_ = MatrixElemCst(i, j);
@@ -304,9 +304,9 @@ public :
   // - Mutators
 
   /// Set a node path from vertex i to vertex j (or both vertices if the relation is symmetric)
-  void InsertLink(std::size_t i, std::size_t j, const distance_type& weight, bool symmetric = false)
+  void InsertLink(int i, int j, const distance_type& weight, bool symmetric = false)
   {
-    if (i >= no_vertices_ || j >= no_vertices_ || i == j)
+    if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || i < 0 || j < 0 || i == j)
     {
       assert(false && "Invalid vertices specified");
       return;
@@ -324,9 +324,9 @@ public :
   }
 
   /// Remove an edge from vertex i to vertex j
-  distance_type ClearLink(std::size_t i, std::size_t j)
+  distance_type ClearLink(int i, int j)
   {
-    if (i >= no_vertices_ || j >= no_vertices_ || i == j)
+    if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || i < 0 || j < 0 || i == j)
     {
       assert(false && "Invalid vertices specified");
       return undefined_weight;
@@ -341,8 +341,8 @@ public :
   /// Clear all edges
   void ClearAllLinks()
   {
-    std::size_t alloc_size = AllocSize();
-    for (std::size_t i = 0; i < alloc_size; ++i)
+    unsigned int alloc_size = AllocSize();
+    for (unsigned int i = 0; i < alloc_size; ++i)
       *(adjacency_matrix_ + i) = undefined_weight;
   }
   
@@ -351,9 +351,9 @@ protected :
   // - Internals
 
   /// Get the corresponding matrix element
-  weight_element_type& MatrixElem(std::size_t i, std::size_t j)
+  weight_element_type& MatrixElem(int i, int j)
   {
-    std::size_t offset = 0;
+    unsigned int offset = 0;
     if (!directed_graph)
     {
       if (i <= j)
@@ -376,9 +376,9 @@ protected :
   }
 
   /// Get the corresponding matrix element
-  const weight_element_type& MatrixElemCst(std::size_t i, std::size_t j) const
+  const weight_element_type& MatrixElemCst(int i, int j) const
   {
-    std::size_t offset = 0;
+    unsigned int offset = 0;
     if (!directed_graph)
     {
       if (i <= j)
@@ -401,7 +401,7 @@ protected :
   }
 
   /// Linear array size
-  std::size_t AllocSize() const
+  unsigned int AllocSize() const
   {
     return directed_graph ? (no_vertices_ * no_vertices_) : (no_vertices_ * (no_vertices_ + 1) / 2);
   }
@@ -409,7 +409,7 @@ protected :
   // - Members
 
   weight_element_type* adjacency_matrix_;
-  std::size_t no_vertices_;
+  unsigned int no_vertices_;
 };
 
 GRAPH_END

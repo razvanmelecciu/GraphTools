@@ -89,6 +89,12 @@ public:
     return no_elements_ * no_elements_;
   }
 
+  /// Nb rows/cols
+  std::size_t GetSize() const
+  {
+    return no_elements_;
+  }
+
   /// Access an element
   const element_type& AccessElementCst(std::size_t i, std::size_t j) const
   {

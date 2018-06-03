@@ -11,8 +11,8 @@ GRAPH_START
 ALGO_START
 
 /// Default trait class that defines the vertex list (deque, vector, list) and the search structure used (set, unordered_set)
-template <class vertex_list_ = std::deque<std::size_t> ,
-          class search_structure_ = std::unordered_set<std::size_t> >
+template <class vertex_list_ = std::deque<int> ,
+          class search_structure_ = std::unordered_set<int> >
 struct Traits
 {
   typedef vertex_list_ vertices_list_trait;
@@ -28,7 +28,7 @@ struct Traversal
   typedef typename traits::search_structure_trait search_structure;
 
   /// Breadth first graph traversal (only explores the current connected component in which crt_vertex resides)
-  static void BreadthFirst(const graph_type& my_graph, std::size_t crt_vertex, vertices_list& node_labels)
+  static void BreadthFirst(const graph_type& my_graph, int crt_vertex, vertices_list& node_labels)
   {
     typename graph_type::neighbors_list vertex_queue;
     search_structure visited_nodes;
@@ -53,15 +53,15 @@ struct Traversal
   }
 
   /// Depth first graph traversal (only explores the current connected component in which crt_vertex resides)
-  static void DepthFirst(const graph_type& my_graph, std::size_t crt_vertex, vertices_list& node_labels)
+  static void DepthFirst(const graph_type& my_graph, int crt_vertex, vertices_list& node_labels)
   {
-    std::unordered_set<std::size_t> visited_nodes;
+    std::unordered_set<int> visited_nodes;
     DFRecursive(my_graph, crt_vertex, node_labels, visited_nodes);
   }
 
 private :
 
-  static void DFRecursive(const graph_type& my_graph, std::size_t crt_vertex, vertices_list& node_labels, search_structure& visited_nodes)
+  static void DFRecursive(const graph_type& my_graph, int crt_vertex, vertices_list& node_labels, search_structure& visited_nodes)
   {
     typename graph_type::neighbors_list crt_vertex_queue;
     typename search_structure::_Pairib inserted_it;
@@ -99,8 +99,8 @@ struct Features
   /// Check Complete graph (basically verifies if the number of edges has reached the maximum)
   static bool CompleteGraph(const graph_type& my_input_graph)
   {
-    std::size_t maxEdges = my_input_graph.MaxNoEdges();
-    std::size_t noEdges = my_input_graph.NoEdges();
+    unsigned int maxEdges = my_input_graph.MaxNoEdges();
+    unsigned int noEdges = my_input_graph.NoEdges();
 
     return (noEdges == maxEdges);
   }
@@ -108,9 +108,9 @@ struct Features
   /// Compute Transitive closure (Roy-Warshall -> places 1 as the cost for the vertex connections)
   static void TransitiveClosure(const graph_type& my_input_graph, graph::common::SquareMatrix<bool>& transitive_closure)
   {
-    std::size_t vertices_nb = my_graph.NoVertices();
+    unsigned int vertices_nb = my_graph.NoVertices();
     transitive_closure.SetSize(vertices_nb, false);
-    std::size_t i = 0, j = 0, k = 0;
+    int i = 0, j = 0, k = 0;
 
     for (i = 0; i < vertices_nb; ++i)
     {
@@ -151,7 +151,8 @@ template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
 struct Paths
 {
   typedef typename graph_type::weight_element_type dist_type;
-  typedef std::pair<dist_type, std::size_t> dist_nxt;
+  typedef std::pair<dist_type, int> dist_nxt;
+  enum { null_vertex = -1 };
 
   /// Djikstra
   //TODO
@@ -164,7 +165,7 @@ struct Paths
     cost_output.SetSize(vertices_nb, 0);
     typename graph_type::weight_element_type crt_dist = 0;
 
-    std::size_t i = 0, j = 0, k = 0;
+    int i = 0, j = 0, k = 0;
 
     for (i = 0; i < vertices_nb; ++i)
     {
@@ -195,14 +196,18 @@ struct Paths
   }
 
   /// Compute all the minimum paths (Floyd-Warshall -> places the distance instead of the edge cost)
-  static void ComputePathsTrails(const graph_type& my_input_graph, graph::common::SquareMatrix<dist_nxt>& cost_output)
+  static void ComputePathsTrails(const graph_type& my_input_graph, graph::common::SquareMatrix<dist_type>& cost_output,
+                                 graph::common::SquareMatrix<int>& nxt_matrix)
   {
     dist_type max_val = std::numeric_limits<dist_type>::max() / 1000;
     auto vertices_nb = my_input_graph.NoVertices();
-    cost_output.SetSize(vertices_nb, dist_nxt(0, 0));
+
+    cost_output.SetSize(vertices_nb, 0);
+    nxt_matrix.SetSize(vertices_nb, null_vertex);
+
     typename graph_type::weight_element_type crt_dist = 0;
 
-    std::size_t i = 0, j = 0, k = 0;
+    unsigned int i = 0, j = 0, k = 0;
 
     for (i = 0; i < vertices_nb; ++i)
     {
@@ -211,11 +216,13 @@ struct Paths
         if (i != j)
         {
           if (my_input_graph.HasLink(i, j))
-            cost_output(i, j).first = my_input_graph.GetWeight(i, j);
+          {
+            cost_output(i, j) = my_input_graph.GetWeight(i, j);
+            nxt_matrix(i, j) = j;
+          }
           else
-            cost_output(i, j).first = max_val;         
+            cost_output(i, j) = max_val;
         }
-        cost_output(i, j).second = j;
       }
     }
 
@@ -225,15 +232,41 @@ struct Paths
       {
         for (j = 0; j < vertices_nb; ++j)
         {
-          crt_dist = cost_output(i, k).first + cost_output(k, j).first;
-          if (crt_dist < cost_output(i, j).first)
+          crt_dist = cost_output(i, k) + cost_output(k, j);
+          if (crt_dist < cost_output(i, j))
           {
-            cost_output(i, j).first = crt_dist;
-            cost_output(i, j).second = cost_output(i, k).second;
+            cost_output(i, j) = crt_dist;
+            nxt_matrix(i, j) = nxt_matrix(i, k);
           }
         }
       }
     }
+  }
+
+  /// Extract a path from the specified square matrix (after calling ComputePathsTrails)
+  static bool ExtractPath(const graph::common::SquareMatrix<int>& mat_paths, int i, int j, std::deque<int>& sequence_trail)
+  {
+    sequence_trail.clear();
+
+    auto vertices_nb = mat_paths.GetSize();
+    if (i >= static_cast<int>(vertices_nb) || j >= static_cast<int>(vertices_nb) || i < 0 || j < 0)
+    {
+      assert(false && "Invalid vertices specified");
+      return false;
+    }
+
+    auto nxt_vertex = mat_paths.AccessElementCst(i, j);
+    if (nxt_vertex == null_vertex)
+      return false;
+
+    sequence_trail.push_back(i);
+    while (nxt_vertex != null_vertex)
+    {
+      sequence_trail.push_back(nxt_vertex);
+      nxt_vertex = mat_paths.AccessElementCst(nxt_vertex, j);
+    }
+
+    return true;
   }
 
   /// Bellman-Ford
