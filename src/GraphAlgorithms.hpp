@@ -2,8 +2,10 @@
 #define _graph_algorithms_h_
 
 #include "GraphBase.hpp"
+#include "GraphMisc.hpp"
 #include <deque>
 #include <unordered_set>
+#include <limits>
 
 GRAPH_START
 ALGO_START
@@ -18,7 +20,7 @@ struct Traits
 };
 
 template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
-          class traits = Traits<>>
+          class traits = Traits<> >
 struct Traversal
 {
   typedef typename graph_type::equivalence_cmp equivalent_elements;
@@ -82,7 +84,7 @@ private :
 };
 
 template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
-          class traits = Traits<>>
+          class traits = Traits<> >
 struct Features
 {
   /// Extract Connected components
@@ -94,17 +96,37 @@ struct Features
   /// Check bipartite
   //TODO
 
-  /// Check Complete graph
-  //TODO
+  /// Check Complete graph (basically verifies if the number of edges has reached the maximum)
+  static bool CompleteGraph(const graph_type& my_input_graph)
+  {
+    std::size_t maxEdges = my_input_graph.MaxNoEdges();
+    std::size_t noEdges = my_input_graph.NoEdges();
 
-  /// Compute Tranzitive closure (Roy-Warshall)
-  //TODO
+    return (noEdges == maxEdges);
+  }
 
-  /// Check Euler graph
-  //TODO
+  /// Compute Transitive closure (Roy-Warshall -> places 1 as the cost for the vertex connections)
+  static void TransitiveClosure(const graph_type& my_input_graph, graph::common::SquareMatrix<bool>& transitive_closure)
+  {
+    std::size_t vertices_nb = my_graph.NoVertices();
+    transitive_closure.SetSize(vertices_nb, false);
+    std::size_t i = 0, j = 0, k = 0;
 
-  /// Check Hamilton graph
-  //TODO
+    for (i = 0; i < vertices_nb; ++i)
+    {
+      for (j = 0; j < vertices_nb; ++j)
+        transitive_closure(i, j) = output_graph.HasLink(i, j);
+    }
+
+    for (k = 0; k < vertices_nb; ++k)
+    {
+      for (i = 0; i < vertices_nb; ++i)
+      {
+        for (j = 0; j < vertices_nb; ++j)
+          transitive_closure(i, j) = transitive_closure(i, j) || (transitive_closure(i, k) && transitive_closure(k, j));
+      }
+    }
+  }
 };
 
 
@@ -113,22 +135,106 @@ template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
 struct MSP
 {
   static_assert(graph_type::directed_graph == 0, "Invalid graph type");
-  /// Kruskal
-  //TODO
+
+  /// Determines the minimum spanning tree for the input graph along with a total connection cost
+  static typename graph_type::weight_element_type Kruskal(const graph_type& my_graph, graph_type& output_msp)
+  {
+
+  }
 
   /// Prim
   //TODO
 };
 
 template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
-          class traits = Traits<>>
+          class traits = Traits<> >
 struct Paths
 {
+  typedef typename graph_type::weight_element_type dist_type;
+  typedef std::pair<dist_type, std::size_t> dist_nxt;
+
   /// Djikstra
   //TODO
 
-  /// Floyd-Warshall
-  //TODO
+  /// Compute all the minimum paths (Floyd-Warshall -> places the distance instead of the edge cost)
+  static void ComputePaths(const graph_type& my_input_graph, graph::common::SquareMatrix<dist_type>& cost_output)
+  {
+    dist_type max_val = std::numeric_limits<dist_type>::max() / 1000;
+    auto vertices_nb = my_input_graph.NoVertices();
+    cost_output.SetSize(vertices_nb, 0);
+    typename graph_type::weight_element_type crt_dist = 0;
+
+    std::size_t i = 0, j = 0, k = 0;
+
+    for (i = 0; i < vertices_nb; ++i)
+    {
+      for (j = 0; j < vertices_nb; ++j)
+      {
+        if (i != j)
+        {
+          if (my_input_graph.HasLink(i, j))
+            cost_output(i, j) = my_input_graph.GetWeight(i, j);
+          else
+            cost_output(i, j) = max_val;
+        }
+      }
+    }
+
+    for (k = 0; k < vertices_nb; ++k)
+    {
+      for (i = 0; i < vertices_nb; ++i)
+      {
+        for (j = 0; j < vertices_nb; ++j)
+        {
+          crt_dist = cost_output(i, k) + cost_output(k, j);
+          if (crt_dist < cost_output(i, j))
+            cost_output(i, j) = crt_dist;
+        }       
+      }
+    }
+  }
+
+  /// Compute all the minimum paths (Floyd-Warshall -> places the distance instead of the edge cost)
+  static void ComputePathsTrails(const graph_type& my_input_graph, graph::common::SquareMatrix<dist_nxt>& cost_output)
+  {
+    dist_type max_val = std::numeric_limits<dist_type>::max() / 1000;
+    auto vertices_nb = my_input_graph.NoVertices();
+    cost_output.SetSize(vertices_nb, dist_nxt(0, 0));
+    typename graph_type::weight_element_type crt_dist = 0;
+
+    std::size_t i = 0, j = 0, k = 0;
+
+    for (i = 0; i < vertices_nb; ++i)
+    {
+      for (j = 0; j < vertices_nb; ++j)
+      {
+        if (i != j)
+        {
+          if (my_input_graph.HasLink(i, j))
+            cost_output(i, j).first = my_input_graph.GetWeight(i, j);
+          else
+            cost_output(i, j).first = max_val;         
+        }
+        cost_output(i, j).second = j;
+      }
+    }
+
+    for (k = 0; k < vertices_nb; ++k)
+    {
+      for (i = 0; i < vertices_nb; ++i)
+      {
+        for (j = 0; j < vertices_nb; ++j)
+        {
+          crt_dist = cost_output(i, k).first + cost_output(k, j).first;
+          if (crt_dist < cost_output(i, j).first)
+          {
+            cost_output(i, j).first = crt_dist;
+            cost_output(i, j).second = cost_output(i, k).second;
+          }
+        }
+      }
+    }
+  }
 
   /// Bellman-Ford
   //TODO
