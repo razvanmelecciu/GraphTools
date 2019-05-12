@@ -161,24 +161,21 @@ public :
   /// Count the number of defined edges
   unsigned int NoEdges() const
   {
-    /*unsigned int alloc_size = AllocSize();
-    unsigned int no_edges = 0;
-    typename base_type::equivalence_cmp equiv;
+    unsigned int no_links = 0;
+    for (unsigned int i = 0; i < no_vertices_; ++i)
+      no_links += static_cast<unsigned int>(collection_node_edge_lists_[i].size());
 
-    for (auto i = 0; i < alloc_size; ++i)
-    {
-      if (equiv(*(adjacency_matrix_ + i), static_cast<distance_type>(undefined_weight)))
-        ++no_edges;
-    }
+    if (!base_type::directed_graph)
+      no_links /= 2;
 
-    return no_edges;*/
+    return no_links;
   }
 
   /// Get the maximum number of edges (refflexivity not included e.g. xRx)
   unsigned int MaxNoEdges() const
   {
     unsigned int max_nb_edge = no_vertices_ * (no_vertices_ - 1);  // digraph
-    if (!directed_graph)                                           // graphs (undirected graphs)
+    if (!base_type::directed_graph)                                           // graphs (undirected graphs)
       max_nb_edge /= 2;
 
     return max_nb_edge;
@@ -234,7 +231,7 @@ public :
       return false;
     }
 
-    if (directed_graph)
+    if (base_type::directed_graph)
     {
       if (HasLink(i, j) && HasLink(j, i))
         return true;
@@ -302,7 +299,7 @@ public :
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || i < 0 || j < 0 || i == j)
     {
       assert(false && "Invalid vertices specified");
-      return undefined_weight;
+      return base_type::undefined_weight;
     }
 
     typename node_edge_list::const_iterator itCrt(collection_node_edge_lists_[i].begin()), itEnd(collection_node_edge_lists_[i].end());
@@ -317,7 +314,7 @@ public :
       }
     }
 
-    return undefined_weight;
+    return base_type::undefined_weight;
   }
 
   /// Clear all edges
@@ -365,7 +362,7 @@ public :
     for (unsigned int i = 0; i < alloc_size; ++i)                // safe to put since the vertices don't generally have links to themselves
       *(adjacency_matrix_ + i) = initial_weight;
     for (unsigned int i = 0; i < no_vertices_; ++i)
-      MatrixElem(i, i) = undefined_weight;
+      MatrixElem(i, i) = base_type::undefined_weight;
   }
 
   /// Copy ctor
@@ -441,9 +438,9 @@ public :
     unsigned int no_edges = 0;
     typename base_type::equivalence_cmp equiv;
 
-    for (auto i = 0; i < alloc_size; ++i)
+    for (unsigned int i = 0; i < alloc_size; ++i)
     {
-      if (equiv(*(adjacency_matrix_ + i), static_cast<distance_type>(undefined_weight)))
+      if (!equiv(*(adjacency_matrix_ + i), static_cast<distance_type>(base_type::undefined_weight)))
         ++no_edges;
     }
 
@@ -454,7 +451,7 @@ public :
   unsigned int MaxNoEdges() const
   {
     unsigned int max_nb_edge = no_vertices_ * (no_vertices_ - 1);  // digraph
-    if (!directed_graph)                                          // graphs (undirected graphs)
+    if (!base_type::directed_graph)                                           // graphs (undirected graphs)
       max_nb_edge /= 2;
 
     return max_nb_edge;
@@ -497,11 +494,11 @@ public :
       return false;
     }
 
-    if (directed_graph)
+    if (base_type::directed_graph)
     {
       typename base_type::equivalence_cmp equiv;
 
-      if (equiv(MatrixElemCst(i, j), undefined_weight) || equiv(MatrixElemCst(j, i), undefined_weight))
+      if (equiv(MatrixElemCst(i, j), base_type::undefined_weight) || equiv(MatrixElemCst(j, i), base_type::undefined_weight))
         return false;
     }
 
@@ -546,7 +543,7 @@ public :
     links_list.clear();
     typename base_type::Edge crtEdge;
 
-    if (directed_graph)
+    if (base_type::directed_graph)
     {
       for (unsigned int i = 0; i < no_vertices_; ++i)
       {
@@ -602,12 +599,12 @@ public :
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || i < 0 || j < 0 || i == j)
     {
       assert(false && "Invalid vertices specified");
-      return undefined_weight;
+      return base_type::undefined_weight;
     }
 
     distance_type prev_value;
     prev_value = MatrixElem(i, j);
-    MatrixElem(i, j) = undefined_weight;
+    MatrixElem(i, j) = base_type::undefined_weight;
     return prev_value;
   }
 
@@ -616,7 +613,7 @@ public :
   {
     unsigned int alloc_size = AllocSize();
     for (unsigned int i = 0; i < alloc_size; ++i)
-      *(adjacency_matrix_ + i) = undefined_weight;
+      *(adjacency_matrix_ + i) = base_type::undefined_weight;
   }
   
 protected :
