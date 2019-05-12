@@ -86,6 +86,7 @@
     <ClInclude Include="src\GraphAlgorithms.hpp" />
     <ClInclude Include="src\GraphBase.hpp" />
     <ClInclude Include="src\GraphCommon.hpp" />
+    <ClInclude Include="src\GraphContainer.hpp" />
     <ClInclude Include="src\GraphMisc.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
