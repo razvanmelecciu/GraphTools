@@ -15,23 +15,26 @@ public:
   typedef elem_type element_type;
 
   /// Ctor
-  explicit SquareMatrix(std::size_t mat_size, element_type initial_value = 0) : no_elements_(mat_size), 
-                                                                                storage_(new element_type[mat_size * mat_size])
+  explicit SquareMatrix(std::size_t mat_size, element_type initial_value = 0) : 
+    no_elements_(mat_size), 
+    storage_(new element_type[mat_size * mat_size])
   {
-    for (std::size_t i = 0; i < AllocSize(); ++i)
+    for (std::size_t i = 0; i < allocSize(); ++i)
       *(storage_ + i) = initial_value;
   }
 
   /// Copy ctor
-  SquareMatrix(const SquareMatrix& RHS) : no_elements_(RHS.no_elements_), 
-                                          storage_(new element_type[RHS.no_elements_ * RHS.no_elements_])
+  SquareMatrix(const SquareMatrix& RHS) : 
+    no_elements_(RHS.no_elements_), 
+    storage_(new element_type[RHS.no_elements_ * RHS.no_elements_])
   {
   }
 
 #ifndef _MOVE_SEMANTICS_OFF
   /// Move ctor
-  SquareMatrix(SquareMatrix&& RHS) : no_elements_(RHS.no_elements_), 
-                                     storage_(RHS.storage_)
+  SquareMatrix(SquareMatrix&& RHS) : 
+    no_elements_(RHS.no_elements_), 
+    storage_(RHS.storage_)
   {
     RHS.storage_ = nullptr;
   }
@@ -55,10 +58,10 @@ public:
       {
         no_elements_ = RHS.no_elements_;
         delete[] storage_;
-        storage_ = new element_type[AllocSize()];
+        storage_ = new element_type[allocSize()];
       }
 
-      for (auto i = 0; i < AllocSize(); ++i)
+      for (auto i = 0; i < allocSize(); ++i)
         *(storage_ + i) = *(RHS.storage_ + i);
     }
 
@@ -84,19 +87,19 @@ public:
   // - Accessors
 
   /// AllocSize
-  std::size_t AllocSize() const
+  std::size_t allocSize() const
   {
     return no_elements_ * no_elements_;
   }
 
   /// Nb rows/cols
-  std::size_t GetSize() const
+  std::size_t getSize() const
   {
     return no_elements_;
   }
 
   /// Access an element
-  const element_type& AccessElementCst(std::size_t i, std::size_t j) const
+  const element_type& accessElementCst(std::size_t i, std::size_t j) const
   {
     if (i >= no_elements_ || j >= no_elements_)
     {
@@ -110,21 +113,21 @@ public:
   // - Mutators
 
   /// Reset the size (all the existing content will be lost)
-  void SetSize(std::size_t new_size, element_type reset_val = 0)
+  void setSize(std::size_t new_size, element_type reset_val = 0)
   {
     if (new_size != no_elements_)
     {
       no_elements_ = new_size;
       delete[] storage_;
-      storage_ = new element_type[AllocSize()];
+      storage_ = new element_type[allocSize()];
     }
 
-    for (std::size_t i = 0; i < AllocSize(); ++i)
+    for (std::size_t i = 0; i < allocSize(); ++i)
       *(storage_ + i) = reset_val;
   }
 
   /// Access an element
-  element_type& AccessElement(std::size_t i, std::size_t j)
+  element_type& accessElement(std::size_t i, std::size_t j)
   {
     if (i >= no_elements_ || j >= no_elements_)
     {
@@ -138,11 +141,11 @@ public:
   /// Modify/Retrieve an element
   element_type& operator () (std::size_t i, std::size_t j)
   {
-    return AccessElement(i, j);
+    return accessElement(i, j);
   }
 
 protected:
-  element_type * storage_;
+  element_type* storage_;
   std::size_t no_elements_;
 };
 

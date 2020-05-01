@@ -10,7 +10,8 @@ template <StoragePolicy storage_method,
   LinkType link_type = UNDIRECTED,
   class distance_type = int,
   class eq_elems = EquivalentElements<distance_type> >
-  class GraphContainer : public GraphBase<storage_method, link_type, distance_type, eq_elems>
+  class GraphContainer : 
+    public GraphBase<storage_method, link_type, distance_type, eq_elems>
 {
 };
 
@@ -91,13 +92,13 @@ public:
   // - Accessors
 
   /// Get the number of vertices
-  unsigned int NoVertices() const
+  unsigned int noVertices() const
   {
     return no_vertices_;
   }
 
   /// Count the number of defined edges
-  unsigned int NoEdges() const
+  unsigned int noEdges() const
   {
     unsigned int no_links = 0;
     for (unsigned int i = 0; i < no_vertices_; ++i)
@@ -110,7 +111,7 @@ public:
   }
 
   /// Get the maximum number of edges (refflexivity not included e.g. xRx)
-  unsigned int MaxNoEdges() const
+  unsigned int maxNoEdges() const
   {
     unsigned int max_nb_edge = no_vertices_ * (no_vertices_ - 1);  // digraph
     if (!base_type::directed_graph)                                // graphs (undirected graphs)
@@ -120,7 +121,7 @@ public:
   }
 
   /// Has link between i and j
-  bool HasLink(int i, int j) const
+  bool hasLink(int i, int j) const
   {
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || 
         i < 0 || j < 0)
@@ -142,7 +143,7 @@ public:
   }
 
   /// Get the weight from node i to node j
-  distance_type GetWeight(int i, int j) const
+  distance_type getWeight(int i, int j) const
   {
     distance_type crt_distance = base_type::undefined_weight;
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || 
@@ -165,7 +166,7 @@ public:
   }
 
   /// Check if the relation is symmetric relation iRj and jRi (not that the cost is the same)
-  bool SymmetricRelation(int i, int j) const
+  bool symmetricRelation(int i, int j) const
   {
     if (i >= no_vertices_ || j >= no_vertices_ || i < 0 || j < 0 || i == j)
     {
@@ -175,7 +176,7 @@ public:
 
     if (base_type::directed_graph)
     {
-      if (HasLink(i, j) && HasLink(j, i))
+      if (hasLink(i, j) && hasLink(j, i))
         return true;
     }
 
@@ -183,7 +184,7 @@ public:
   }
 
   /// Get the list of links for the current node
-  void GetLinks(int vertex, typename base_type::neighbors_list& vertex_list) const
+  void getLinks(int vertex, typename base_type::neighbors_list& vertex_list) const
   {
     if (vertex >= static_cast<int>(no_vertices_) || vertex < 0)
     {
@@ -196,7 +197,7 @@ public:
   }
 
   /// Get a list with all the links defined
-  void GetAllLinks(std::deque<typename base_type::Edge>& links_list) const
+  void getAllLinks(std::deque<typename base_type::Edge>& links_list) const
   {
     links_list.clear();
     typename base_type::Edge crtEdge;
@@ -216,7 +217,7 @@ public:
   // - Mutators
 
   /// Set a node path from vertex i to vertex j (or both vertices if the relation is symmetric)
-  void InsertLink(int i, int j, const distance_type& weight, bool symmetric = false)
+  void insertLink(int i, int j, const distance_type& weight, bool symmetric = false)
   {
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || 
         i < 0 || j < 0 || i == j)
@@ -237,7 +238,7 @@ public:
   }
 
   /// Remove an edge from vertex i to vertex j
-  distance_type ClearLink(int i, int j)
+  distance_type clearLink(int i, int j)
   {
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || 
         i < 0 || j < 0 || i == j)
@@ -263,9 +264,9 @@ public:
   }
 
   /// Clear all edges
-  void ClearAllLinks()
+  void clearAllLinks()
   {
-    unsigned int alloc_size = this->AllocSize();
+    unsigned int alloc_size = this->allocSize();
     for (unsigned int i = 0; i < alloc_size; ++i)
       collection_node_edge_lists_[i].clear();
   }
@@ -295,7 +296,7 @@ public:
   /// Ctor
   GraphContainer(unsigned int no_vertices) : no_vertices_(no_vertices)
   {
-    unsigned int alloc_size = AllocSize();
+    unsigned int alloc_size = allocSize();
     adjacency_matrix_ = new typename base_type::weight_element_type[alloc_size];
     for (unsigned int i = 0; i < alloc_size; ++i)
       *(adjacency_matrix_ + i) = base_type::undefined_weight;
@@ -305,7 +306,7 @@ public:
   GraphContainer(unsigned int no_vertices, const distance_type& initial_weight) : 
     no_vertices_(no_vertices)
   {
-    unsigned int alloc_size = AllocSize();
+    unsigned int alloc_size = allocSize();
     adjacency_matrix_ = new typename base_type::weight_element_type[alloc_size];
     for (unsigned int i = 0; i < alloc_size; ++i)                // safe to put since the vertices don't generally have links to themselves
       *(adjacency_matrix_ + i) = initial_weight;
@@ -316,7 +317,7 @@ public:
   /// Copy ctor
   GraphContainer(const GraphContainer& rhs_elem) : no_vertices_(rhs_elem.no_vertices_)
   {
-    unsigned int alloc_size = AllocSize();
+    unsigned int alloc_size = allocSize();
     adjacency_matrix_ = new typename base_type::weight_element_type[alloc_size];
     for (unsigned int i = 0; i < alloc_size; ++i)
       *(adjacency_matrix_ + i) = *(rhs_elem.adjacency_matrix_ + i);
@@ -343,7 +344,7 @@ public:
         delete[] adjacency_matrix_;
 
       no_vertices_ = rhs_elem.no_vertices;
-      unsigned int alloc_size = AllocSize();
+      unsigned int alloc_size = allocSize();
 
       adjacency_matrix_ = new typename base_type::weight_element_type[alloc_size];
       for (unsigned int i = 0; i < alloc_size; ++i)
@@ -374,15 +375,15 @@ public:
   // - Accessors
 
   /// Get the number of vertices
-  unsigned int NoVertices() const
+  unsigned int noVertices() const
   {
     return no_vertices_;
   }
 
   /// Count the number of defined edges
-  unsigned int NoEdges() const
+  unsigned int noEdges() const
   {
-    unsigned int alloc_size = AllocSize();
+    unsigned int alloc_size = allocSize();
     unsigned int no_edges = 0;
     typename base_type::equivalence_cmp equiv;
 
@@ -396,7 +397,7 @@ public:
   }
 
   /// Get the maximum number of edges (refflexivity not included e.g. xRx)
-  unsigned int MaxNoEdges() const
+  unsigned int maxNoEdges() const
   {
     unsigned int max_nb_edge = no_vertices_ * (no_vertices_ - 1);  // digraph
     if (!base_type::directed_graph)                                // graphs (undirected graphs)
@@ -406,7 +407,7 @@ public:
   }
 
   /// Has link between i and j
-  bool HasLink(int i, int j) const
+  bool hasLink(int i, int j) const
   {
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || 
         i < 0 || j < 0)
@@ -423,7 +424,7 @@ public:
   }
 
   /// Get the weight from node i to node j
-  distance_type GetWeight(int i, int j) const
+  distance_type getWeight(int i, int j) const
   {
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || 
         i < 0 || j < 0 || i == j)
@@ -436,7 +437,7 @@ public:
   }
 
   /// Check if the relation is symmetric relation iRj and jRi (not that the cost is the same)
-  bool SymmetricRelation(int i, int j) const
+  bool symmetricRelation(int i, int j) const
   {
     if (i >= no_vertices_ || j >= no_vertices_ || i < 0 || j < 0 || i == j)
     {
@@ -457,7 +458,7 @@ public:
   }
 
   /// Get the list of links for the current node
-  void GetLinks(int vertex, typename base_type::neighbors_list& vertex_list) const
+  void getLinks(int vertex, typename base_type::neighbors_list& vertex_list) const
   {
     if (vertex >= static_cast<int>(no_vertices_) || vertex < 0)
     {
@@ -489,7 +490,7 @@ public:
   }
 
   /// Get a list with all the links defined
-  void GetAllLinks(std::deque<typename base_type::Edge>& links_list) const
+  void getAllLinks(std::deque<typename base_type::Edge>& links_list) const
   {
     links_list.clear();
     typename base_type::Edge crtEdge;
@@ -525,7 +526,7 @@ public:
   // - Mutators
 
   /// Set a node path from vertex i to vertex j (or both vertices if the relation is symmetric)
-  void InsertLink(int i, int j, const distance_type& weight, bool symmetric = false)
+  void insertLink(int i, int j, const distance_type& weight, bool symmetric = false)
   {
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || 
         i < 0 || j < 0 || i == j)
@@ -546,7 +547,7 @@ public:
   }
 
   /// Remove an edge from vertex i to vertex j
-  distance_type ClearLink(int i, int j)
+  distance_type clearLink(int i, int j)
   {
     if (i >= static_cast<int>(no_vertices_) || j >= static_cast<int>(no_vertices_) || 
         i < 0 || j < 0 || i == j)
@@ -562,9 +563,9 @@ public:
   }
 
   /// Clear all edges
-  void ClearAllLinks()
+  void clearAllLinks()
   {
-    unsigned int alloc_size = AllocSize();
+    unsigned int alloc_size = allocSize();
     for (unsigned int i = 0; i < alloc_size; ++i)
       *(adjacency_matrix_ + i) = base_type::undefined_weight;
   }
@@ -624,9 +625,10 @@ protected:
   }
 
   /// Linear array size
-  unsigned int AllocSize() const
+  unsigned int allocSize() const
   {
-    return base_type::directed_graph ? (no_vertices_ * no_vertices_) : (no_vertices_ * (no_vertices_ + 1) / 2);
+    return base_type::directed_graph ? 
+           (no_vertices_ * no_vertices_) : (no_vertices_ * (no_vertices_ + 1) / 2);
   }
 
   // - Members
