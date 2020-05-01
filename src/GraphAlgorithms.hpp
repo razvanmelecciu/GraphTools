@@ -34,7 +34,7 @@ struct Traversal
   {
     typename graph_type::neighbors_list vertex_queue;
     search_structure visited_nodes;
-    typename search_structure::_Pairib inserted_it;
+    std::pair<typename search_structure::iterator, bool> inserted_it;
 
     vertex_queue.push_back(crt_vertex);
     my_graph.GetLinks(crt_vertex, vertex_queue);
@@ -66,7 +66,7 @@ private :
   static void DFRecursive(const graph_type& my_graph, int crt_vertex, vertices_list& node_labels, search_structure& visited_nodes)
   {
     typename graph_type::neighbors_list crt_vertex_queue;
-    typename search_structure::_Pairib inserted_it;
+    std::pair<typename search_structure::iterator, bool> inserted_it;
 
     inserted_it = visited_nodes.insert(crt_vertex);
     if (inserted_it.second)
@@ -106,17 +106,17 @@ struct Features
     {
       switch (degr_option)
       {
-      case graph::EXTERNAL:
+      case graph::algorithms::EXTERNAL:
       default:
         {
-          for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
+          for (int i = 0; i < static_cast<int>(vertices_nb); ++i)
             if (my_input_graph.HasLink(input_vertex, i))
               ++comp_degree;
         }
         break;
-      case graph::INTERNAL:
+      case graph::algorithms::INTERNAL:
         {
-          for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
+          for (int i = 0; i < static_cast<int>(vertices_nb); ++i)
             if (my_input_graph.HasLink(i, input_vertex))
               ++comp_degree;
         }
@@ -125,7 +125,7 @@ struct Features
     }
     else
     {
-      for (int i = 0; i < static_cast<int>(no_vertices_); ++i)
+      for (int i = 0; i < static_cast<int>(vertices_nb); ++i)
         if (my_input_graph.HasLink(input_vertex, i))
           ++comp_degree;
     }
