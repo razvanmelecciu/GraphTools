@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(main_app VERSION 1.0.0)
-configure_file(config.h.in config.h)
-
-add_subdirectory(test)
-include_directories(src)
-add_subdirectory(lib/GoogleTest)
+project(main_test VERSION 1.0.0)
 
 # Set variables
 set(CMAKE_CXX_STANDARD 17)
@@ -17,7 +12,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
 # Add path to additional modules
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/modules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../modules")
 
 # Output paths
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -34,40 +29,27 @@ find_package(TBB)
 find_package(OpenMP)
 
 # Debug messages
-message(STATUS ${SECTION_SEPARATOR})
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
-message(STATUS "CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
-message(STATUS "C++ Standard: " ${CMAKE_CXX_STANDARD})
-if(Boost_FOUND)
-    message(STATUS "Boost Version: " ${BOOST_VER})
-endif()
-if(TBB_FOUND)
-    message(STATUS "TBB Version: " ${TBB_VERSION_MAJOR} ${TBB_VERSION.MINOR})
-    message(STATUS "TBB Interface Version: " ${TBB_INTERFACE_VERSION})
-endif()
-if(OpenMP_FOUND)
-    message(STATUS "OpenMP Spec Date: " ${OpenMP_CXX_SPEC_DATE})
-    message(STATUS "OpenMP C++ Flags: " ${OpenMP_CXX_FLAGS})
-endif()
-message(STATUS ${SECTION_SEPARATOR})
+# ...
 
 # Compile and assemble into a target
-add_executable(main_app main_launch.cpp)
-target_link_libraries(main_app Threads::Threads)
+add_executable(main_test main_test.cpp tests.cpp)
+target_link_libraries(main_test Threads::Threads)
 if(Boost_FOUND)
     message(STATUS "Adding support for Boost libraries...")
     include_directories(${Boost_INCLUDE_DIRS})
-    target_link_libraries(main_app Boost::log)
+    target_link_libraries(main_test Boost::log)
 endif()
 if(TBB_FOUND)
     message(STATUS "Adding support for TBB libraries...")
-    target_link_libraries(main_app tbb)
+    target_link_libraries(main_test tbb)
 endif()
 if(OpenMP_FOUND)
     message(STATUS "Adding support for OpenMP libraries...")
-    target_link_libraries(main_app OpenMP::OpenMP_CXX)
+    target_link_libraries(main_test OpenMP::OpenMP_CXX)
 endif()
-target_include_directories(main_app PUBLIC "${PROJECT_BINARY_DIR}")
+message(STATUS "Adding support for Google Test/Mock libraries...")
+target_link_libraries(main_test gtest gmock)
+target_include_directories(main_test PUBLIC "${PROJECT_BINARY_DIR}")
 
 # Log output paths
 message(STATUS ${SECTION_SEPARATOR})
