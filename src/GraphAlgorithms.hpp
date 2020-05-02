@@ -62,7 +62,7 @@ struct Traversal
   /// Depth first graph traversal (only explores the current connected component in which crt_vertex resides)
   static void depthFirst(const graph_type& my_graph, int crt_vertex, vertices_list& node_labels)
   {
-    std::unordered_set<int> visited_nodes;
+    search_structure visited_nodes;
     dfRecursive(my_graph, crt_vertex, node_labels, visited_nodes);
   }
 
