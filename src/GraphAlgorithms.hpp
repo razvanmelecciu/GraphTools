@@ -231,6 +231,7 @@ template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
 struct Paths
 {
   typedef typename graph_type::weight_element_type dist_type;
+  typedef typename traits::vertices_list_trait vertices_list;
   typedef std::pair<dist_type, int> dist_nxt;
   enum { null_vertex = -1 };
 
@@ -324,7 +325,8 @@ struct Paths
   }
 
   /// Extract a path from the specified square matrix (after calling computePathsTrails)
-  static bool extractPath(const graph::common::SquareMatrix<int>& mat_paths, int i, int j, std::deque<int>& sequence_trail)
+  static bool extractPath(const graph::common::SquareMatrix<int>& mat_paths, int i, int j, 
+                          vertices_list& sequence_trail)
   {
     sequence_trail.clear();
 
