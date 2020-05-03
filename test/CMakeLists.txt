@@ -29,10 +29,26 @@ find_package(TBB)
 find_package(OpenMP)
 
 # Debug messages
-# ...
+message(STATUS ${SECTION_SEPARATOR})
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
+message(STATUS "CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
+message(STATUS "C++ Standard: " ${CMAKE_CXX_STANDARD})
+if(Boost_FOUND)
+    message(STATUS "Boost Version: " ${BOOST_VER})
+endif()
+if(TBB_FOUND)
+    message(STATUS "TBB Version: " ${TBB_VERSION_MAJOR} ${TBB_VERSION.MINOR})
+    message(STATUS "TBB Interface Version: " ${TBB_INTERFACE_VERSION})
+endif()
+if(OpenMP_FOUND)
+    message(STATUS "OpenMP Spec Date: " ${OpenMP_CXX_SPEC_DATE})
+    message(STATUS "OpenMP C++ Flags: " ${OpenMP_CXX_FLAGS})
+endif()
+message(STATUS ${SECTION_SEPARATOR})
 
 # Compile and assemble into a target
 add_executable(main_test main_test.cpp tests.cpp)
+include_directories(../src)
 target_link_libraries(main_test Threads::Threads)
 if(Boost_FOUND)
     message(STATUS "Adding support for Boost libraries...")
