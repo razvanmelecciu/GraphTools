@@ -2,9 +2,20 @@ cmake_minimum_required(VERSION 3.5)
 project(main_app VERSION 1.0.0)
 configure_file(config.h.in config.h)
 
+# Consider Google Test/Mock to be globally installed
+set(GOOGLE_TEST_GLOBAL_INSTALL TRUE)
+
 add_subdirectory(test)
 include_directories(src)
-add_subdirectory(lib/GoogleTest)
+
+if (NOT GOOGLE_TEST_GLOBAL_INSTALL)
+    message(STATUS "Searching for Google Test/Mock locally")
+    add_subdirectory(lib/GoogleTest)
+else()
+    message(STATUS "Using Google Test/Mock globally. Make sure it's installed.")
+    # apt install libgmock-dev
+    # apt install libgtest-dev
+endif()
 
 # Set variables
 set(CMAKE_CXX_STANDARD 17)

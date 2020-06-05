@@ -15,7 +15,7 @@ enum DegreeType : unsigned char { EXTERNAL = 0x00, INTERNAL };
 /// Default trait class that defines the vertex list (deque, vector, list) and the search structure used (set, unordered_set)
 template <class vertex_list_ = std::deque<int>,
           class search_structure_ = std::unordered_set<int>,
-          class vertex_list_list = std::deque<std::deque<int> > >
+          class vertex_list_list = std::deque<std::deque<int>>>
 struct Traits
 {
   typedef vertex_list_ vertices_list_trait;
@@ -26,7 +26,7 @@ struct Traits
 };
 
 template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
-          class traits = Traits<> >
+          class traits = Traits<>>
 struct Traversal
 {
   typedef typename graph_type::equivalence_cmp equivalent_elements;
@@ -92,7 +92,7 @@ private :
 };
 
 template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
-          class traits = Traits<> >
+          class traits = Traits<>>
 struct Features
 {
   typedef typename traits::vertices_list_trait vertices_list;
@@ -117,21 +117,21 @@ struct Features
     {
       switch (degr_option)
       {
-      case graph::algorithms::EXTERNAL:
-      default:
-      {
-        for (int i = 0; i < static_cast<int>(vertices_nb); ++i)
-          if (my_input_graph.hasLink(input_vertex, i))
-            ++comp_degree;
-      }
-      break;
-      case graph::algorithms::INTERNAL:
-      {
-        for (int i = 0; i < static_cast<int>(vertices_nb); ++i)
-          if (my_input_graph.hasLink(i, input_vertex))
-            ++comp_degree;
-      }
-      break;
+        case graph::algorithms::EXTERNAL:
+        default:
+        {
+          for (int i = 0; i < static_cast<int>(vertices_nb); ++i)
+            if (my_input_graph.hasLink(input_vertex, i))
+              ++comp_degree;
+        }
+        break;
+        case graph::algorithms::INTERNAL:
+        {
+          for (int i = 0; i < static_cast<int>(vertices_nb); ++i)
+            if (my_input_graph.hasLink(i, input_vertex))
+              ++comp_degree;
+        }
+        break;
       }
     }
     else
@@ -227,7 +227,7 @@ struct MSP
 };
 
 template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
-          class traits = Traits<> >
+          class traits = Traits<>>
 struct Paths
 {
   typedef typename graph_type::weight_element_type dist_type;
@@ -276,7 +276,8 @@ struct Paths
     }
   }
 
-  /// Compute all the minimum paths (Floyd-Warshall-returns a square matrix with the associated cost and a matrix with the next vertex for reconstructing the minimum paths)
+  /// Compute all the minimum paths (Floyd-Warshall-returns a square matrix with the associated cost and a matrix with
+  /// the next vertex for reconstructing the minimum paths)
   static void computePathsTrails(const graph_type& my_input_graph, graph::common::SquareMatrix<dist_type>& cost_output,
                                  graph::common::SquareMatrix<int>& nxt_matrix)
   {
@@ -325,7 +326,7 @@ struct Paths
   }
 
   /// Extract a path from the specified square matrix (after calling computePathsTrails)
-  static bool extractPath(const graph::common::SquareMatrix<int>& mat_paths, int i, int j, 
+  static bool extractPath(const graph::common::SquareMatrix<int>& mat_paths, int i, int j,
                           vertices_list& sequence_trail)
   {
     sequence_trail.clear();
