@@ -148,29 +148,16 @@ struct Features
   static unsigned int connectedComponents(const graph_type& my_input_graph, 
                                           vertex_lists& node_labels)
   {
-    search_structure visitedVertices;
-    vertices_list crtNodeLabels;
-    unsigned int nbConnComponents = 0;
-    
-    auto nbVertices = my_input_graph.noVertices();
-    for (auto i = 0 ; i < nbVertices; ++i)
-    {
-      if (visitedVertices.find(i) == visitedVertices.end())
-      {
-        ++nbConnComponents;
-        Traversal<graph_type, traits>::breadthFirst(my_input_graph, i, crtNodeLabels);
-        node_labels.push_back(crtNodeLabels);
-        for (const auto& elem : crtNodeLabels)
-        {
-          visitedVertices.insert(elem);
-        }
-        crtNodeLabels.clear();
-      }
-    }
-
-    return nbConnComponents;
+    return connectedCompsHelper(my_input_graph, &node_labels);
   }
 
+  /// Checks if the graph is connected
+  static bool isConnected(const graph_type& my_input_graph)
+  {
+    auto nb_connected_comps = connectedCompsHelper(my_input_graph);
+    return (nb_connected_comps == 1);
+  }
+  
   /// Extract disjoint cycles
   //TODO
 
@@ -225,6 +212,35 @@ struct Features
   }
 
 private :
+
+  static unsigned int connectedCompsHelper(const graph_type& my_input_graph, 
+                                           vertex_lists* node_labels=nullptr)
+  {
+    search_structure visitedVertices;
+    vertices_list crtNodeLabels;
+    unsigned int nbConnComponents = 0;
+    
+    auto nbVertices = my_input_graph.noVertices();
+    for (auto i = 0 ; i < nbVertices; ++i)
+    {
+      if (visitedVertices.find(i) == visitedVertices.end())
+      {
+        ++nbConnComponents;
+        Traversal<graph_type, traits>::breadthFirst(my_input_graph, i, crtNodeLabels);
+        if (node_labels)
+        {
+          node_labels->push_back(crtNodeLabels);
+        }
+        for (const auto& elem : crtNodeLabels)
+        {
+          visitedVertices.insert(elem);
+        }
+        crtNodeLabels.clear();
+      }
+    }
+
+    return nbConnComponents;
+  }
 
   static bool dfCycleDetected(const graph_type& my_graph, int crt_vertex, 
                               search_structure& visited_nodes, int parent_vertex = -1)

@@ -163,6 +163,40 @@ TEST(undirected_graphs, test_conn_comps_2)
     EXPECT_THAT(conn_comps[0], ElementsAre(0, 1, 3, 8, 7, 2, 4, 5, 6));
 }
 
+TEST(undirected_graphs, test_connected_1)
+{
+    namespace algo = graph::algorithms;
+    using graph::ADJACENCY_MATRIX;
+    using graph::UNDIRECTED;
+    using graph_container = graph::GraphContainer<ADJACENCY_MATRIX, UNDIRECTED>;
+    using weight_el = graph_container::weight_element_type;
+
+    graph_container my_graph(4);
+
+    my_graph.insertLink(0, 1, 3, true);
+    my_graph.insertLink(1, 2, 2, true);
+    // vertex 3 is isolated
+
+    EXPECT_FALSE(algo::Features<graph_container>::isConnected(my_graph));
+}
+
+TEST(undirected_graphs, test_connected_2)
+{
+    namespace algo = graph::algorithms;
+    using graph::ADJACENCY_MATRIX;
+    using graph::UNDIRECTED;
+    using graph_container = graph::GraphContainer<ADJACENCY_MATRIX, UNDIRECTED>;
+    using weight_el = graph_container::weight_element_type;
+
+    graph_container my_graph(4);
+
+    my_graph.insertLink(0, 1, 3, true);
+    my_graph.insertLink(1, 2, 2, true);
+    my_graph.insertLink(0, 3, 2, true);
+
+    EXPECT_TRUE(algo::Features<graph_container>::isConnected(my_graph));
+}
+
 TEST(undirected_graphs, test_vertex_degree)
 {
     namespace algo = graph::algorithms;
