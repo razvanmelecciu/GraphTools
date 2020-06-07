@@ -268,6 +268,7 @@ private :
       }
     }
 
+    // case for an isolated node
     return false;
   }
 
