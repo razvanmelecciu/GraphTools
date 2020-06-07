@@ -382,6 +382,152 @@ TEST(undirected_graphs, test_transitive_closure_2)
     }
 }
 
+TEST(undirected_graphs, test_cycle_present_1)
+{
+    namespace algo = graph::algorithms;
+    using graph::ADJACENCY_MATRIX;
+    using graph_container = graph::GraphContainer<ADJACENCY_MATRIX>;
+
+    graph_container my_graph(4);
+
+    my_graph.insertLink(0, 1, 1);
+    my_graph.insertLink(1, 2, 1);
+    my_graph.insertLink(2, 3, 1);
+    my_graph.insertLink(3, 0, 1);
+
+    EXPECT_TRUE(algo::Features<graph_container>::hasCycles(my_graph, 0));
+}
+
+TEST(undirected_graphs, test_cycle_present_2)
+{
+    namespace algo = graph::algorithms;
+    using graph::ADJACENCY_MATRIX;
+    using graph_container = graph::GraphContainer<ADJACENCY_MATRIX>;
+
+    graph_container my_graph(4);
+
+    my_graph.insertLink(0, 1, 1);
+    my_graph.insertLink(1, 2, 1);
+    my_graph.insertLink(2, 3, 1);
+
+    EXPECT_FALSE(algo::Features<graph_container>::hasCycles(my_graph, 0));
+}
+
+TEST(undirected_graphs, test_cycle_present_3)
+{
+    namespace algo = graph::algorithms;
+    using graph::ADJACENCY_MATRIX;
+    using graph_container = graph::GraphContainer<ADJACENCY_MATRIX>;
+
+    graph_container my_graph(4);
+
+    my_graph.insertLink(0, 1, 1);
+    my_graph.insertLink(1, 2, 1);
+    my_graph.insertLink(2, 0, 1);
+    my_graph.insertLink(2, 3, 1);
+
+    EXPECT_TRUE(algo::Features<graph_container>::hasCycles(my_graph, 0));
+}
+
+TEST(undirected_graphs, test_cycle_present_4)
+{
+    namespace algo = graph::algorithms;
+    using graph::ADJACENCY_MATRIX;
+    using graph_container = graph::GraphContainer<ADJACENCY_MATRIX>;
+
+    graph_container my_graph(7);
+
+    // connected comp 1 has a cycle
+    my_graph.insertLink(0, 1, 1);
+    my_graph.insertLink(1, 2, 1);
+    my_graph.insertLink(2, 0, 1);
+    my_graph.insertLink(2, 3, 1);
+
+    // connected comp 2 has no cycles
+    my_graph.insertLink(4, 5, 1);
+    my_graph.insertLink(5, 6, 1);
+
+    for (auto initial_vertex = 0; initial_vertex < 4; ++initial_vertex)
+    {
+      EXPECT_TRUE(algo::Features<graph_container>::hasCycles(my_graph, initial_vertex));
+    }
+    for (auto initial_vertex = 4; initial_vertex < 7; ++initial_vertex)
+    {
+      EXPECT_FALSE(algo::Features<graph_container>::hasCycles(my_graph, initial_vertex));
+    }
+}
+
+TEST(undirected_graphs, test_cycle_present_5)
+{
+    namespace algo = graph::algorithms;
+    using graph::ADJACENCY_MATRIX;
+    using graph_container = graph::GraphContainer<ADJACENCY_MATRIX>;
+
+    graph_container my_graph(7);
+
+    // connected comp 1 has no cycles
+    my_graph.insertLink(0, 1, 1);
+    my_graph.insertLink(1, 2, 1);
+    my_graph.insertLink(2, 3, 1);
+
+    // connected comp 2 has a cycles
+    my_graph.insertLink(4, 5, 1);
+    my_graph.insertLink(5, 6, 1);
+    my_graph.insertLink(4, 6, 1);
+
+    for (auto initial_vertex = 0; initial_vertex < 4; ++initial_vertex)
+    {
+      EXPECT_FALSE(algo::Features<graph_container>::hasCycles(my_graph, initial_vertex));
+    }
+    for (auto initial_vertex = 4; initial_vertex < 7; ++initial_vertex)
+    {
+      EXPECT_TRUE(algo::Features<graph_container>::hasCycles(my_graph, initial_vertex));
+    }
+}
+
+TEST(undirected_graphs, test_cycle_present_6)
+{
+    namespace algo = graph::algorithms;
+    using graph::ADJACENCY_MATRIX;
+    using graph_container = graph::GraphContainer<ADJACENCY_MATRIX>;
+
+    graph_container my_graph(7);
+
+    my_graph.insertLink(0, 1, 1);
+    my_graph.insertLink(1, 2, 1);
+    my_graph.insertLink(2, 3, 1);
+    my_graph.insertLink(4, 5, 1);
+    my_graph.insertLink(5, 6, 1);
+    my_graph.insertLink(4, 0, 1);
+
+    for (auto initial_vertex = 0; initial_vertex < 7; ++initial_vertex)
+    {
+      EXPECT_FALSE(algo::Features<graph_container>::hasCycles(my_graph, initial_vertex));
+    }
+}
+
+TEST(undirected_graphs, test_cycle_present_7)
+{
+    namespace algo = graph::algorithms;
+    using graph::ADJACENCY_MATRIX;
+    using graph_container = graph::GraphContainer<ADJACENCY_MATRIX>;
+
+    graph_container my_graph(7);
+
+    my_graph.insertLink(0, 1, 1);
+    my_graph.insertLink(1, 2, 1);
+    my_graph.insertLink(2, 3, 1);
+    my_graph.insertLink(4, 5, 1);
+    my_graph.insertLink(5, 6, 1);
+    my_graph.insertLink(4, 0, 1);
+    my_graph.insertLink(0, 6, 1);
+
+    for (auto initial_vertex = 0; initial_vertex < 7; ++initial_vertex)
+    {
+      EXPECT_TRUE(algo::Features<graph_container>::hasCycles(my_graph, initial_vertex));
+    }
+}
+
 TEST(directed_graphs, test_compute_all_min_paths_1)
 {
     namespace algo = graph::algorithms;

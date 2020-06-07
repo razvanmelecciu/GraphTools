@@ -177,6 +177,21 @@ struct Features
   /// Check bipartite
   //TODO
 
+  /// Checks if the there is at least a cycle in the subgraph that contains the specified vertex
+  static bool hasCycles(const graph_type& my_input_graph, int crt_vertex)
+  {
+    if (graph_type::directed_graph)
+    {
+      // cycle digraph
+      return true;
+    }
+    else
+    {
+      search_structure visited_nodes;
+      return dfCycleDetected(my_input_graph, crt_vertex, visited_nodes);
+    }
+  }
+
   /// Check Complete graph (basically verifies if the number of edges has reached the maximum possible)
   static bool completeGraph(const graph_type& my_input_graph)
   {
@@ -208,6 +223,54 @@ struct Features
       }
     }
   }
+
+private :
+
+  static bool dfCycleDetected(const graph_type& my_graph, int crt_vertex, 
+                              search_structure& visited_nodes, int parent_vertex = -1)
+  {
+    static_assert(graph_type::directed_graph == 0, "Invalid graph type");
+
+    typename graph_type::neighbors_list crt_vertex_queue;
+    std::pair<typename search_structure::iterator, bool> inserted_it;
+
+    inserted_it = visited_nodes.insert(crt_vertex);
+    my_graph.getLinks(crt_vertex, crt_vertex_queue);
+
+    typename graph_type::neighbors_list::const_iterator crt_vertex_it(crt_vertex_queue.begin());
+    typename graph_type::neighbors_list::const_iterator end(crt_vertex_queue.end());
+
+    if (parent_vertex < 0)
+    {
+      parent_vertex = crt_vertex;
+    }
+
+    for (; crt_vertex_it != end; ++crt_vertex_it)
+    {
+      // exclude the parent from the list of neighbors
+      if (*crt_vertex_it == parent_vertex)
+      {
+        continue;
+      }
+
+      if (visited_nodes.find(*crt_vertex_it) == visited_nodes.end())
+      {
+        bool result = dfCycleDetected(my_graph, *crt_vertex_it, visited_nodes, crt_vertex);
+        // end exploration once a cycle has been found
+        if (result)
+        {
+          return result;
+        }
+      }
+      else
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
 };
 
 template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
