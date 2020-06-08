@@ -15,12 +15,14 @@ enum DegreeType : unsigned char { EXTERNAL = 0x00, INTERNAL };
 /// Default trait class that defines the vertex list (deque, vector, list) and the search structure used (set, unordered_set)
 template <class vertex_list_ = std::deque<int>,
           class search_structure_ = std::unordered_set<int>,
-          class vertex_list_list = std::deque<std::deque<int>>>
+          class vertex_list_list = std::deque<std::deque<int>>,
+          class vertex_list_category = std::deque<std::pair<int, int>>>
 struct Traits
 {
   typedef vertex_list_ vertices_list_trait;
   typedef search_structure_ search_structure_trait;
-  typedef vertex_list_list vertices_list_list_trait; 
+  typedef vertex_list_list vertices_list_list_trait;
+  typedef vertex_list_category vertex_list_categ;
 
   // static_assert(vertex_list_list::value_type == )
 };
@@ -98,6 +100,7 @@ struct Features
   typedef typename traits::vertices_list_trait vertices_list;
   typedef typename traits::search_structure_trait search_structure;
   typedef typename traits::vertices_list_list_trait vertex_lists;
+  typedef typename traits::vertex_list_categ vertex_categ;
 
   /// Compute the internal/external degree of a node (for undirected graphs the internal and external degree are the same)
   static unsigned int computeDegree(const graph_type& my_input_graph, 
@@ -157,25 +160,54 @@ struct Features
     auto nb_connected_comps = connectedCompsHelper(my_input_graph);
     return (nb_connected_comps == 1);
   }
-  
-  /// Extract disjoint cycles
-  //TODO
 
-  /// Check bipartite
-  //TODO
+  /// Check if the graph is bipartite (returns a vertex list with the category)
+  static bool isBipartite(const graph_type& my_input_graph, vertex_categ& vertex_list)
+  {
+    /*typename graph_type::neighbors_list vertex_queue;
+    search_structure visited_nodes;
+    std::pair<typename search_structure::iterator, bool> inserted_it;
+
+    vertex_queue.push_back(crt_vertex);
+    my_graph.getLinks(crt_vertex, vertex_queue);
+
+    auto categ_left  = 0;
+    auto categ_right = 1;
+    auto s_categ = 1;
+    auto crt_categ = categ_left;
+
+    while (vertex_queue.size() > 0)
+    {
+      inserted_it = visited_nodes.insert(vertex_queue.front());
+      if (!inserted_it.second)
+      {
+        vertex_queue.pop_front();
+      }
+      else
+      {
+        auto front_elem = vertex_queue.front();
+        vertex_list.push_back(std::make_pair(front_elem, crt_categ));
+        vertex_queue.pop_front();
+        if (vertex_queue.size() > 0)
+        {
+          my_graph.getLinks(front_elem, vertex_queue);
+        }
+      }
+    }*/
+  }
 
   /// Checks if the there is at least a cycle in the subgraph that contains the specified vertex
   static bool hasCycles(const graph_type& my_input_graph, int crt_vertex)
   {
+    search_structure visited_nodes;
     if (graph_type::directed_graph)
     {
-      // cycle digraph
-      return true;
+      search_structure rec_chain_visited;
+      return dfCycleDetectedD(my_input_graph, crt_vertex, visited_nodes, rec_chain_visited);
     }
     else
     {
-      search_structure visited_nodes;
-      return dfCycleDetected(my_input_graph, crt_vertex, visited_nodes);
+      return dfCycleDetectedU(my_input_graph, crt_vertex, visited_nodes);
     }
   }
 
@@ -242,10 +274,10 @@ private :
     return nbConnComponents;
   }
 
-  static bool dfCycleDetected(const graph_type& my_graph, int crt_vertex, 
-                              search_structure& visited_nodes, int parent_vertex = -1)
+  static bool dfCycleDetectedU(const graph_type& my_graph, int crt_vertex, 
+                               search_structure& visited_nodes, int parent_vertex = -1)
   {
-    static_assert(graph_type::directed_graph == 0, "Invalid graph type");
+    // static_assert(graph_type::directed_graph == 0, "Invalid graph type");
 
     typename graph_type::neighbors_list crt_vertex_queue;
     std::pair<typename search_structure::iterator, bool> inserted_it;
@@ -271,7 +303,7 @@ private :
 
       if (visited_nodes.find(*crt_vertex_it) == visited_nodes.end())
       {
-        bool result = dfCycleDetected(my_graph, *crt_vertex_it, visited_nodes, crt_vertex);
+        bool result = dfCycleDetectedU(my_graph, *crt_vertex_it, visited_nodes, crt_vertex);
         // end exploration once a cycle has been found
         if (result)
         {
@@ -288,6 +320,47 @@ private :
     return false;
   }
 
+  static bool dfCycleDetectedD(const graph_type& my_graph, int crt_vertex, 
+                               search_structure& visited_nodes, 
+                               search_structure& rec_chain_visited)
+  {
+    // static_assert(graph_type::directed_graph == 1, "Invalid graph type");
+
+    typename graph_type::neighbors_list crt_vertex_queue;
+    std::pair<typename search_structure::iterator, bool> inserted_it;
+
+    inserted_it = visited_nodes.insert(crt_vertex);
+    my_graph.getLinks(crt_vertex, crt_vertex_queue);
+
+    // keep track of the vertexes that are in the crt recursion chain
+    rec_chain_visited.insert(crt_vertex);
+
+    typename graph_type::neighbors_list::const_iterator crt_vertex_it(crt_vertex_queue.begin());
+    typename graph_type::neighbors_list::const_iterator end(crt_vertex_queue.end());
+
+    for (; crt_vertex_it != end; ++crt_vertex_it)
+    {
+      if (rec_chain_visited.find(*crt_vertex_it) != rec_chain_visited.end())
+      {
+        // vertex found in the crt recursive chain - cycle detected
+        return true;
+      }
+
+      if (visited_nodes.find(*crt_vertex_it) == visited_nodes.end())
+      {
+        bool cycleDetected = dfCycleDetectedD(my_graph, *crt_vertex_it, visited_nodes, rec_chain_visited);
+        // end exploration once a cycle has been found
+        if (cycleDetected)
+        {
+          rec_chain_visited.erase(crt_vertex);
+          return cycleDetected;
+        }
+      }
+    }
+
+    rec_chain_visited.erase(crt_vertex);
+    return false;
+  }
 };
 
 template <class graph_type = graph::GraphContainer<ADJACENCY_MATRIX>,
