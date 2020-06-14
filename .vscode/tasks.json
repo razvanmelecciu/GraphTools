@@ -6,7 +6,7 @@
         {
             "label": "CMake_Configure_Debug",
             "type": "shell",
-            "command": "cmake --no-warn-unused-cli -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Debug -H${workspaceFolder} -B${workspaceFolder}/build \"-GUnix Makefiles\"",
+            "command": "cmake --no-warn-unused-cli -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Debug -H${workspaceFolder} -B${workspaceFolder}/build \"-GUnix Makefiles\"",
             "group": "build",
             "presentation": {
                 "clear": true
@@ -27,7 +27,7 @@
         {
             "label": "CMake_Configure_Release",
             "type": "shell",
-            "command": "cmake --no-warn-unused-cli -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -H${workspaceFolder} -B${workspaceFolder}/build \"-GUnix Makefiles\"",
+            "command": "cmake --no-warn-unused-cli -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -H${workspaceFolder} -B${workspaceFolder}/build \"-GUnix Makefiles\"",
             "group": "build",
             "presentation": {
                 "clear": true
